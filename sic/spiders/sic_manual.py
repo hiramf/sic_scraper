@@ -13,37 +13,37 @@ class SicManualSpider(scrapy.Spider):
     page_links = lambda self,response: response.xpath('//div[@id="maincontain"]/div[@class="row-fluid"]//a[not(contains(@class, "btn"))]')
     a_href = lambda self,link: link.xpath('@href').extract_first()
     a_title = lambda self,link: link.xpath('@title').extract_first()
-    #parse_description = lambda self, response: " ".join(response.css('html body div#wrapper div#maincontain.container div.row-fluid div span.blueTen ::text').extract())
+    parse_description = lambda self, response: " ".join(response.css('html body div#wrapper div#maincontain.container div.row-fluid div span.blueTen ::text').extract())
 
     def parse(self, response):
-        print('FOOOO')
+        print(self.a_title(self.page_links(response)[0]))
         for link in self.page_links(response):
             title = self.a_title(link)
             href = self.a_href(link)
 
-            if "division" in title:
+            if "Division" in title:
                 self.logger.info(f'Parsing {title}')
-                yield response.follow(href, self.parse_division)
+                #yield response.follow(href, self.parse_division)
 
-            elif "group" in title:
+            elif "Group" in title:
                 self.logger.info(f'Parsing {title}')
                 yield response.follow(href, self.parse_group)
 
     def parse_division(self, response):
         yield {
         'divsion_title': response.css('html body div#wrapper div#maincontain.container div.row-fluid h2 ::text').extract_first(),
-        #'division_description': " ".join(response.css('#maincontain > div:nth-child(1) > div:nth-child(2) ::text').extract())
+        'division_description': " ".join(response.css('#maincontain > div:nth-child(1) > div:nth-child(2) ::text').extract())
         }
 
     def parse_group(self, response):
         yield {
         'major_group_title': response.css('html body div#wrapper div#maincontain.container div.row-fluid h2 ::text').extract_first()
-        #'major_group_description': parse_description(response)
+        'major_group_description': parse_description(response)
         }
 
         for link in self.page_links(response):
             self.logger.info(f'Parsing Industry {self.a_title(link)}')
-            #yield response.follow(self.a_href(link), self.parse_industry)
+            yield response.follow(self.a_href(link), self.parse_industry)
 
     def parse_industry(self, response):
         structure = response.css('html body div#wrapper div#maincontain.container div.row-fluid p a').xpath('@title')
@@ -66,6 +66,6 @@ class SicManualSpider(scrapy.Spider):
         'major_group_title': major(structure).group(2),
         'industry_group_number': industry_group(response).group(1),
         'industry_group_title': industry_group(response).group(2),
-        'industry_group_description': parse_description(response),
+        'industry_group_description': self.parse_description(response),
         'industry_group_examples': examples(response)
         }
