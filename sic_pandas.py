@@ -1,6 +1,9 @@
 '''
 An example of how to load in the data
 scraped from the SIC website.
+
+Crawl data using this command on the command line:
+"scrapy crawl sic_manual -o sic_manual_nested.json"
 '''
 
 import json
