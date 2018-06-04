@@ -11,10 +11,11 @@ class SicManualSpider(scrapy.Spider):
     a_href = lambda self,link: link.xpath('@href').extract_first()
     a_title = lambda self,link: link.xpath('@title').extract_first()
 
-    def parse(self, response):
-        path = '//div[@id="maincontain"]/div[@class="row-fluid"]//a[not(contains(@class, "btn"))]'
+    def page_links(self, response):
+        return response.xpath('//div[@id="maincontain"]/div[@class="row-fluid"]//a[not(contains(@class, "btn"))]')
 
-        for link in response.xpath(path):
+    def parse(self, response):
+        for link in self.page_links(response):
             title = self.a_title(link)
             href = self.a_href(link)
 
@@ -29,17 +30,16 @@ class SicManualSpider(scrapy.Spider):
     def parse_division(self, response):
         yield {
         'divsion_title': response.css('html body div#wrapper div#maincontain.container div.row-fluid h2 ::text').extract_first(),
-        'division_description': " ".join(response.css('#maincontain > div:nth-child(1) > div:nth-child(2) ::text').extract())
+        #'division_description': " ".join(response.css('#maincontain > div:nth-child(1) > div:nth-child(2) ::text').extract())
         }
 
     def parse_group(self, response):
-        path = '//div[@id="maincontain"]/div[@class="row-fluid"]//a[not(contains(@class, "btn"))]'
         yield {
         'major_group_title': response.css('html body div#wrapper div#maincontain.container div.row-fluid h2 ::text').extract_first()
-        'major_group_description': " ".join(response.css('html body div#wrapper div#maincontain.container div.row-fluid div span.blueTen ::text').extract())
+        #'major_group_description': " ".join(response.css('html body div#wrapper div#maincontain.container div.row-fluid div span.blueTen ::text').extract())
         }
 
-        for link in response.xpath(path):
+        for link in self.page_links(response):
             yield {
             'industry_title' : self.a_title(link)
             }
