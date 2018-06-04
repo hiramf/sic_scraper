@@ -37,7 +37,7 @@ class SicManualSpider(scrapy.Spider):
 
     def parse_group(self, response):
         yield {
-        'major_group_title': response.css('html body div#wrapper div#maincontain.container div.row-fluid h2 ::text').extract_first()
+        'major_group_title': response.css('html body div#wrapper div#maincontain.container div.row-fluid h2 ::text').extract_first(),
         'major_group_description': parse_description(response)
         }
 
