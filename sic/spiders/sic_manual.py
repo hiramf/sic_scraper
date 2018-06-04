@@ -8,11 +8,9 @@ class SicManualSpider(scrapy.Spider):
     #allowed_domains = ['https://www.osha.gov/pls/imis/sic_manual.html']
     start_urls = ['https://www.osha.gov/pls/imis/sic_manual.html/']
 
+    page_links = lambda self,response: response.xpath('//div[@id="maincontain"]/div[@class="row-fluid"]//a[not(contains(@class, "btn"))]')
     a_href = lambda self,link: link.xpath('@href').extract_first()
     a_title = lambda self,link: link.xpath('@title').extract_first()
-
-    def page_links(self, response):
-        return response.xpath('//div[@id="maincontain"]/div[@class="row-fluid"]//a[not(contains(@class, "btn"))]')
 
     def parse(self, response):
         for link in self.page_links(response):
@@ -40,6 +38,17 @@ class SicManualSpider(scrapy.Spider):
         }
 
         for link in self.page_links(response):
-            yield {
-            'industry_title' : self.a_title(link)
-            }
+            self.logger.info(f'Parsing Industry {self.a_title(link)}')
+            yield response.follow(self.a_href(link), self.parse_industry)
+
+    def parse_industry(self, response):
+        structure = response.css('html body div#wrapper div#maincontain.container div.row-fluid p a').xpath('@title')
+        division = lambda s: re.search(r'Division\s([A-Z])\:\s(.*)', s[0].extract())
+        major = lambda s: re.search(r'Major\sGroup\s([0-9]{2})\:\s(.*)', s[1].extract())
+
+        yield {
+        'Division': division(structure).group(1),
+        'Division Title': division(structure).group(2),
+        'Major Group': major(structure).group(1),
+        'Major Group Title': major(structure).group(2)
+        }
