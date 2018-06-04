@@ -51,7 +51,7 @@ class SicManualSpider(scrapy.Spider):
         yield {
         'level': 'major',
         'data': {
-            'major_group_number': re.search(r'Major\sGroup\s([0-9]{2})\:\s(.*)', major(response)).group(1),
+            'major_group_number': int(re.search(r'Major\sGroup\s([0-9]{2})\:\s(.*)', major(response)).group(1)),
             'major_group_title': re.search(r'Major\sGroup\s([0-9]{2})\:\s(.*)', major(response)).group(2),
             'major_group_description': self.parse_description(response)
             }
@@ -83,11 +83,11 @@ class SicManualSpider(scrapy.Spider):
         'data': {
             'division_letter': division(structure).group(1),
             'division_title': division(structure).group(2),
-            'major_group_number': major(structure).group(1),
+            'major_group_number': int(major(structure).group(1)),
             'major_group_title': major(structure).group(2),
-            'industry_group_number': industry_group(response).group(1),
+            'industry_group_number': int(industry_group(response).group(1)),
             'industry_group_title': industry_group(response).group(2),
-            'sic_number': sic(response).group(1),
+            'sic_number': int(sic(response).group(1)),
             'sic_title': sic(response).group(2),
             'sic_description': self.parse_description(response),
             'sic_examples': examples(response)
